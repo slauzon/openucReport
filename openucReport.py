@@ -5,6 +5,7 @@ import psycopg2
 import sys
 import socket
 
+launchDate = '2013-03-17'
 today = datetime.date.today()
 margin = datetime.timedelta(days = 5)
 
@@ -34,4 +35,5 @@ def calls(date):
 
 print('Statistics for %s openUC Trial' % socket.gethostname())
 print('Logins since %s:  %s' % (today - margin,logins(today,margin)))
+print('Calls since launch date %s:  %s' % (launchDate,calls(launchDate)))
 print('Calls since %s:  %s' % (today - margin,calls(today - margin)))
