@@ -10,15 +10,19 @@ today = datetime.date.today()
 margin = datetime.timedelta(days = 5)
 
 def logins(today,margin):
-  loginCount = 0
+  weekLogins = 0
+  totalLogins = 0
   for line in open('/var/log/sipxpbx/sipxconfig-logins.log').readlines():
     timestamp,info = line.strip().split(': ')
     timestamp = timestamp.replace('"','').split(',')[0]
     date_object = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
     if today - margin <= date_object.date() <= today:
       #print(str(date_object) + ' ' + info)
-      loginCount += 1
-  return loginCount
+      weekLogins += 1
+      totalLogins += 1
+    else: 
+      totalLogins += 1
+  return weekLogins,totalLogins
 
 def calls(date):
   try:
@@ -32,8 +36,22 @@ def calls(date):
   finally:
     if con:
       con.close()
+hostname = socket.gethostname()
+weekLogins, totalLogins = logins(today,margin)
+marginDay = today - margin
 
-print('Statistics for %s openUC Trial' % socket.gethostname())
-print('Logins since %s:  %s' % (today - margin,logins(today,margin)))
-print('Calls since launch date %s:  %s' % (launchDate,calls(launchDate)))
-print('Calls since %s:  %s' % (today - margin,calls(today - margin)))
+output = '''
+HOSTNAME Usage Report
+------
+Logins since launch date LAUNCHDAY:	TOTALLOGINS
+Logins since MARGINDAY:		WEEKLOGINS
+Calls since launch date LAUNCHDAY:	TOTALCALLS
+Calls since MARGINDAY:			WEEKCALLS
+'''
+
+output = output.replace('HOSTNAME', socket.gethostname())
+output = output.replace('LAUNCHDAY', launchDate).replace('MARGINDAY', str(marginDay))
+output = output.replace('TOTALLOGINS', str(totalLogins)).replace('WEEKLOGINS', str(weekLogins))
+output = output.replace('TOTALCALLS', str(calls(launchDate))).replace('WEEKCALLS', str(calls(marginDay)))
+
+print(output)
