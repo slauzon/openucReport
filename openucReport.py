@@ -8,6 +8,7 @@ import socket
 launchDate = '2013-03-17'
 today = datetime.date.today()
 margin = datetime.timedelta(days = 5)
+marginDay = today - margin
 
 def logins(today,margin):
   weekLogins = 0
@@ -36,9 +37,7 @@ def calls(date):
   finally:
     if con:
       con.close()
-hostname = socket.gethostname()
 weekLogins, totalLogins = logins(today,margin)
-marginDay = today - margin
 
 output = '''
 HOSTNAME Usage Report
