@@ -4,6 +4,8 @@ import datetime
 import psycopg2
 import sys
 import socket
+import glob
+import gzip
 
 launchDate = '2013-03-17'
 today = datetime.date.today()
@@ -13,16 +15,21 @@ marginDay = today - margin
 def logins(today,margin):
   weekLogins = 0
   totalLogins = 0
-  for line in open('/var/log/sipxpbx/sipxconfig-logins.log').readlines():
-    timestamp,info = line.strip().split(': ')
-    timestamp = timestamp.replace('"','').split(',')[0]
-    date_object = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
-    if today - margin <= date_object.date() <= today:
-      #print(str(date_object) + ' ' + info)
-      weekLogins += 1
-      totalLogins += 1
-    else: 
-      totalLogins += 1
+  for files in glob.glob('/var/log/sipxpbx/sipxconfig-logins*'):
+    if files.endswith('.gz'):
+      data = gzip.open(files, 'rb')
+    else:
+      data = open(files)
+    for line in data.readlines():
+      timestamp,info = line.strip().split(': ')
+      timestamp = timestamp.replace('"','').split(',')[0]
+      date_object = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
+      if today - margin <= date_object.date() <= today:
+	#print(str(date_object) + ' ' + info)
+	weekLogins += 1
+	totalLogins += 1
+      else: 
+	totalLogins += 1
   return weekLogins,totalLogins
 
 def calls(date):
